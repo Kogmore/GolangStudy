@@ -2,6 +2,8 @@ package main
 
 import (
 	"GolangStudy/13-channel/test/channel"
+	"fmt"
+	"runtime"
 	"sync"
 )
 
@@ -14,15 +16,21 @@ import (
 //创建线程等待
 var w sync.WaitGroup
 
-func main() {
+func ProductionEndConsumption() {
 	//定义一个通道ch
 	ch := make(chan int, 10)
-	//创建计数器
-	w.Add(2)
 	//生产者
+	w.Add(1)
 	go channel.Production(ch, &w)
-	//消费者
-	go channel.Consumption(ch, &w)
+	fmt.Println(runtime.NumCPU() / 2)
+	for i := 0; i < runtime.NumCPU()/2; i++ {
+		w.Add(1)
+		//消费者
+		go channel.Consumption(ch, &w)
+	}
 	//等待计数器为0
 	w.Wait()
+}
+func main() {
+	ProductionEndConsumption()
 }
